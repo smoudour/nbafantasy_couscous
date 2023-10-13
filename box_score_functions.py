@@ -1,20 +1,23 @@
-from .api_data import *
-from espn_api.basketball import League, Team
-from espn_api.basketball.box_score import BoxScore
+from api_data import *
+from espn_api.basketball.box_score import H2HCategoryBoxScore
 import pandas as pd
 
-# logic
-# week_bs = my_league.box_scores(matchup_period=1)
 
-#Compares box score of team 1 over team 2 and presents a result if these two teams were fighting together in this week
-def compare_per_week(team1, team2, week_boxscore: BoxScore) -> pd.DataFrame:
+# Get only categories of interest, reference in 'categories' list
+def fix_team_stats(team_stats: dict, categ: list = categories) -> dict:
 
+    fixed_team_stats = {key: team_stats[key] for key in categ}
+    return fixed_team_stats
+    
+
+# Compares box score of team 1 VS team 2 for specified week
+def compare_per_week(team1: str, team2: str, week_boxscore: list[H2HCategoryBoxScore]) -> pd.DataFrame:
+
+    # loop through week boxscore, find designated teams
     team1_flag = True
     team2_flag = True
     index = 0
-
     while team1_flag or team2_flag:
-    # for box_score in week_boxscore:
         if team1 == week_boxscore[index].home_team.team_name:
             team1_stats = week_boxscore[index].home_stats
             team1_flag = False
@@ -29,11 +32,17 @@ def compare_per_week(team1, team2, week_boxscore: BoxScore) -> pd.DataFrame:
             team2_flag = False
         index += 1
 
+    #here fix the stats -- only include desired categories
+    team1_stats = fix_team_stats(team1_stats, categ=categories)
+    team2_stats = fix_team_stats(team2_stats, categ=categories)
+
+    # get values only (not results)
     team1_stat_values = [value['value'] for value in team1_stats.values()]
     team2_stat_values = [value['value'] for value in team2_stats.values()]
     cat = list(team1_stats.keys())
     result = []
 
+    # decide projected matchup outcome
     zip_object = zip(team1_stat_values, team2_stat_values)
     for value1, value2 in zip_object:
         if value1 > value2:
@@ -43,14 +52,13 @@ def compare_per_week(team1, team2, week_boxscore: BoxScore) -> pd.DataFrame:
         else:
             result.append('D')
     
-
+    #create dataframe with results VS designated team
     d = {'Cat' : cat, team1 : team1_stat_values, team2 : team2_stat_values, 'Result' : result}
     result_df = pd.DataFrame(data=d)
 
     return result_df
 
-
-
+# Compares projected results of team 1 VS team 2 for the whole season
 def compare_season(team1: str, team2: str, league: League, season_length: int) -> dict:
 
     result_df = {}
@@ -61,22 +69,8 @@ def compare_season(team1: str, team2: str, league: League, season_length: int) -
 
     return result_df
 
-
-def fix_categories(box_scores: pd.DataFrame, included_cat: list = categories) -> pd.DataFrame:
-
-    fixed_results = {}
-    for week in box_scores.keys():
-        try:
-            box_scores[week].set_index(keys='Cat', inplace=True)
-        except:
-            print('Already indexed!')
-
-        df = box_scores[week].loc[included_cat]
-        fixed_results[week] = df
-
-    return fixed_results
-
-
+# Calculate wins of team 1 VS team 2 for each projected week matchup
+# to be used in graphs
 def wins_per_week(season_comparison: dict) -> pd.DataFrame:
 
     weeks = list(season_comparison.keys())
@@ -102,14 +96,9 @@ def wins_per_week(season_comparison: dict) -> pd.DataFrame:
 # On the hand if a team won the matchup but would have won only 20% of the matchups, it implies that the team got lucky and played with the weakest opponent in the league, so changes should be made. 
 # The percentage of wins across the league, puts the win/loss into perspective.
 
-def fix_team_stats(team_stats: dict, categories: list) -> dict:
-
-    fixed_team_stats = {key: team_stats[key] for key in categories}
-    return fixed_team_stats
-    
 
 # Get team stats for every team for a specific week
-def get_teams_stats(week_boxscores: list) -> dict:
+def get_teams_stats(week_boxscores: list[H2HCategoryBoxScore]) -> dict:
 
     teams_stats = {}
     for boxscore in week_boxscores:
@@ -117,8 +106,8 @@ def get_teams_stats(week_boxscores: list) -> dict:
         team_stats_1 = boxscore.home_stats
         team_name_2 = boxscore.away_team.team_name
         team_stats_2 = boxscore.away_stats
-        teams_stats[team_name_1] = fix_team_stats(team_stats_1, categories=categories)
-        teams_stats[team_name_2] = fix_team_stats(team_stats_2, categories=categories)
+        teams_stats[team_name_1] = fix_team_stats(team_stats_1)
+        teams_stats[team_name_2] = fix_team_stats(team_stats_2)
 
 
     return teams_stats
@@ -147,3 +136,28 @@ def against_all(my_team: str, week_matchups: dict) -> pd.DataFrame:
             totals[team] = result_df
 
     return totals  
+
+
+def matchup_outcome(team_cats: pd.DataFrame) -> str:
+
+    if sum(team_cats['Result'] == 'W') > 4:
+        return 'W'
+    elif sum(team_cats['Result'] == 'L') > 4:
+        return 'L'
+    else:
+        return 'D'
+    
+
+def against_all_totals(projected_scores: pd.DataFrame) -> dict:
+
+    results = {}
+    for team in projected_scores.keys():
+        results[team] = matchup_outcome(projected_scores[team])
+
+    return results
+
+
+## TO DO 
+
+# 1) MAKE FUNCTION TO CALCULATE W OR L FOR CATEGORIES
+# 2) FIX TURNOVERS -- LESS TURNOVERS MEANS WIN
