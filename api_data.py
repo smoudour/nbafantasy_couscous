@@ -7,7 +7,6 @@ credentials = {'leagueID ' : 77307155,
 
 my_league = League(league_id=credentials['leagueID '], year=credentials['year'], espn_s2=credentials['espn_s2'], swid=credentials['swid'])
 
-
-# Variables
+# Global Variables
 league_duration = 20
 categories = ['PTS', 'BLK', 'STL', 'AST', 'REB', 'TO', '3PTM', 'FG%', 'FT%']

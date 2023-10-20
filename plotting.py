@@ -1,29 +1,18 @@
-import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib import colors
 from box_score_functions import *
 
-results = compare_season('Faliro City Tricksters ', 'Guatemala Parrots', my_league, 20)
-results = fix_categories(results)
-wins = wins_per_week(results)
+results = compare_season('Faliro City Tricksters ', 'Guatemala Parrots', my_league, league_duration)
+wins = wins_per_matchup(results)
 
 
-# To create matrix of dimensions [ len(wins_list)/X, X ]
-# m = []
-# X = 4
-# wins_list = list(wins['Wins'])
 
-# while wins_list != []:
-#     m.append(wins_list[:X])
-#     wins_list = wins_list[X:]
+# Plots single graph of total category wins per matchup VS one specific team for the whole Season
 
 teams = list(wins['Week'])
 outcomes = list(wins['Wins'])
 mask = list(wins['Wins']>4)
 
-
-
-# plots single graph of total category wins per matchup VS one specific team
 team1 = 'Faliro City Tricksters '
 team2 = 'Guatemala Parrots'
 

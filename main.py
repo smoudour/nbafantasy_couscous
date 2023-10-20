@@ -1,6 +1,6 @@
 # Things to test
-from .api_data import *
-from .box_score_functions import compare_season, matchup_outcome, against_all, get_teams_stats
+from api_data import *
+from box_score_functions import compare_season, matchup_outcome, against_all_week, boxscores_to_dict
 # from espn_api.basketball import League
 
 
@@ -15,8 +15,8 @@ faliro_season_vs_strogg = compare_season('Faliro City Tricksters ', 'Brooklyn  S
 week = 1
 my_team = 'Faliro City Tricksters '
 week_boxscore = my_league.box_scores(matchup_period=week)
-week_boxscore_stats = get_teams_stats(week_boxscore)
-faliro_vs_all_week = against_all(my_team, week_boxscore_stats)
+week_boxscore_stats = boxscores_to_dict(week_boxscore)
+faliro_vs_all_week = against_all_week(my_team, week_boxscore_stats)
 
 for week in faliro_season_vs_strogg.keys():
     print(f'{week}: {matchup_outcome(faliro_season_vs_strogg[week])}')
