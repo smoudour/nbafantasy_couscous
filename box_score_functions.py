@@ -1,12 +1,13 @@
 from api_data import *
 from espn_api.basketball.box_score import H2HCategoryBoxScore
+from espn_api.basketball import League
 import pandas as pd
 
 # Get only categories of interest, reference in 'categories' list
-def fix_team_stats(team_stats: dict, categ: list = categories) -> dict:
+# def fix_team_stats(team_stats: dict, categ: list = categories) -> dict:
 
-    fixed_team_stats = {key: team_stats[key] for key in categ}
-    return fixed_team_stats
+#     fixed_team_stats = {key: team_stats[key] for key in categ}
+#     return fixed_team_stats
     
 
 # Get team stats for every team for a specific week
@@ -98,7 +99,6 @@ def compare_season(team1: str, team2: str, league: League, season_length: int) -
 # On the hand if a team won the matchup but would have won only 20% of the matchups, it implies that the team got lucky and played with the weakest opponent in the league, so changes should be made. 
 # The percentage of wins across the league, puts the win/loss into perspective.
 
-
 # Compare stats of a specifed team against all others for given week
 def against_all_week(my_team: str, week_matchups: dict, categories: list = categories) -> pd.DataFrame:
 
@@ -118,8 +118,8 @@ def against_all_week(my_team: str, week_matchups: dict, categories: list = categ
     return totals  
 
 
-
 # Calculate wins of team 1 VS team 2 for each matchup
+# Doesn't decide the matchup outcome, just counts the number of wins.
 def wins_per_matchup(matchups: dict) -> pd.DataFrame:
 
     keys = list(matchups.keys())
@@ -134,8 +134,7 @@ def wins_per_matchup(matchups: dict) -> pd.DataFrame:
 
     return df
 
-
-# Calculate outcome for matchups
+# Calculate outcome for projected matchups
 def matchup_outcome(single_matchup: pd.DataFrame) -> str:
 
     wins = sum(single_matchup['Result'] == 'W')

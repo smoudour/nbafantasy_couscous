@@ -1,0 +1,9 @@
+FUNCTIONALITES
+
+COMPLETED
+- Compare categories between selected teams (team1 & team2) if they played against each other every week
+- Compare categories of selected team over all other teams for selected week.
+- Fix TO be counted as 'W' instead of 'L' when they are more
+
+TO BE IMPLEMENTED
+- Get best category on matchup comparisons. For example, when comparing team1 against all other teams for selected week, what's the list of categories that team 1 always or almost always wins? In the same manner, what is team1's weakest categories?
